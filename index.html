@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Color Shape Memory Task v2</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #1b1f24;
+      --muted: #667085;
+      --line: #d8dee8;
+      --teal: #0f766e;
+      --teal-dark: #115e59;
+      --coral: #b93815;
+      --amber: #b7791f;
+      --shadow: 0 18px 42px rgba(27, 31, 36, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      line-height: 1.5;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app-shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0;
+    }
+
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.1;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .subtle {
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin: 18px 0;
+    }
+
+    label {
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      min-height: 44px;
+      padding: 10px 14px;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #eef2f7;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    button.warning {
+      background: var(--coral);
+    }
+
+    button.option {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    button.option.is-selected {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.58;
+    }
+
+    .status-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 0;
+    }
+
+    .stat:last-child {
+      border-bottom: 0;
+    }
+
+    .stage {
+      display: grid;
+      min-height: 420px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .cue {
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+    }
+
+    .stimulus {
+      min-width: min(680px, 100%);
+      min-height: 150px;
+      display: grid;
+      place-items: center;
+    }
+
+    .shape {
+      width: 116px;
+      height: 116px;
+      display: inline-grid;
+      place-items: center;
+      filter: drop-shadow(0 10px 16px rgba(27, 31, 36, 0.14));
+    }
+
+    .shape svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .shape.small {
+      width: 28px;
+      height: 28px;
+      filter: none;
+    }
+
+    .shape.medium {
+      width: 46px;
+      height: 46px;
+      filter: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #e8edf3;
+      margin-top: 14px;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--amber);
+      transition: width 180ms ease;
+    }
+
+    .response-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .response-sequence {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      min-height: 72px;
+      margin-top: 12px;
+    }
+
+    .response-slot {
+      min-height: 70px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: #fbfcfe;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .summary-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfe;
+    }
+
+    .summary-box strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1.1;
+      color: var(--teal-dark);
+      overflow-wrap: anywhere;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 780px) {
+
+      .grid,
+      .response-grid,
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .option-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .response-sequence {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app-shell">
+    <header>
+      <div>
+        <h1>Color Shape Memory Task v2</h1>
+        <p class="subtle">색상과 도형 조합을 순서대로 기억하고, 선택지로 응답합니다.</p>
+      </div>
+      <span class="pill">2 × 2: set size 4/6 × delay 1s/4s</span>
+    </header>
+
+    <section id="screen-start" class="grid">
+      <div class="panel">
+        <h2>실험 시작</h2>
+        <p class="subtle">한 시행 안에서 같은 색상-도형 조합은 반복되지 않습니다. 도형이나 색상만 따로 보면 반복될 수 있습니다.</p>
+
+        <div class="field">
+          <label for="participant-id">참가자 ID</label>
+          <input id="participant-id" autocomplete="off" placeholder="예: P001">
+        </div>
+
+        <div class="actions">
+          <button id="start-button" type="button">시작</button>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <h2>설정</h2>
+        <div class="status-list">
+          <div class="stat"><span>연습 시행</span><strong>4</strong></div>
+          <div class="stat"><span>본 시행</span><strong>24</strong></div>
+          <div class="stat"><span>조건</span><strong>A, B, C, D</strong></div>
+          <div class="stat"><span>Set size</span><strong>4, 6</strong></div>
+          <div class="stat"><span>유지 구간</span><strong>1초, 4초</strong></div>
+          <div class="stat"><span>응답 방식</span><strong>선택지 클릭</strong></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="screen-task" class="panel hidden" aria-live="polite">
+      <div class="stat">
+        <span id="trial-status">Practice 1 / 4</span>
+        <strong id="condition-status">Set size 4 · 1초</strong>
+      </div>
+      <div class="progress-bar" aria-hidden="true">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+
+      <div id="stimulus-stage" class="stage">
+        <div class="cue">
+          <div id="stimulus-text" class="stimulus">준비</div>
+          <p id="stage-help" class="subtle">화면에 나오는 색상-도형 조합을 순서대로 기억하세요.</p>
+        </div>
+      </div>
+
+      <div id="response-panel" class="hidden">
+        <h2>응답 선택</h2>
+        <p id="response-help" class="subtle">색상과 도형을 하나씩 선택한 뒤 추가하세요.</p>
+
+        <div class="response-grid">
+          <div>
+            <h2>색상</h2>
+            <div id="color-options" class="option-grid"></div>
+          </div>
+          <div>
+            <h2>도형</h2>
+            <div id="shape-options" class="option-grid"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="add-response-button" type="button" disabled>응답 추가</button>
+          <button id="undo-response-button" class="secondary" type="button">되돌리기</button>
+          <button id="clear-response-button" class="secondary" type="button">전체 지우기</button>
+        </div>
+
+        <div id="response-sequence" class="response-sequence"></div>
+
+        <div class="actions">
+          <button id="submit-button" type="button" disabled>제출</button>
+        </div>
+      </div>
+
+      <div id="feedback-panel" class="hidden">
+        <h2>연습 피드백</h2>
+        <p id="feedback-text" class="subtle"></p>
+        <div class="actions">
+          <button id="next-button" type="button">다음 시행</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-results" class="panel hidden">
+      <h2>결과 요약</h2>
+      <div id="summary" class="summary-grid"></div>
+      <div class="actions">
+        <button id="download-button" type="button">CSV 다운로드</button>
+        <button id="send-sheets-button" class="secondary" type="button">Google Sheets 전송</button>
+        <button id="restart-button" class="secondary" type="button">다시 시작</button>
+      </div>
+      <p id="sheets-status" class="subtle"></p>
+      <div id="condition-table"></div>
+    </section>
+  </main>
+
+  <script src="core.js"></script>
+  <script>
+    (function () {
+      const SHEETS_URL = '여기에_새_Google_Apps_Script_Web_App_URL을_넣으세요';
+      const core = window.ColorShapeMemoryCore;
+
+      const state = {
+        participantId: '',
+        sheetsUrl: '',
+        trials: [],
+        currentIndex: 0,
+        results: [],
+        responseStartedAt: 0,
+        selectedColor: '',
+        selectedShape: '',
+        responseItems: [],
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      function setScreen(activeId) {
+        ['screen-start', 'screen-task', 'screen-results'].forEach((id) => {
+          const element = $(id);
+          if (element) {
+            element.classList.toggle('hidden', id !== activeId);
+          }
+        });
+      }
+
+      function getColor(colorId) {
+        return core.COLORS.find((color) => color.id === colorId);
+      }
+
+      function getShape(shapeId) {
+        return core.SHAPES.find((shape) => shape.id === shapeId);
+      }
+
+      function renderShape(shapeId, colorHex, sizeClass = '') {
+        const className = `shape ${sizeClass}`.trim();
+        const fill = colorHex || '#98a2b3';
+        if (shapeId === 'circle') {
+          return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="${fill}"></circle></svg></span>`;
+        }
+        if (shapeId === 'triangle') {
+          return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon points="50,8 92,88 8,88" fill="${fill}"></polygon></svg></span>`;
+        }
+        if (shapeId === 'star') {
+          return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon points="50,7 61,37 93,38 67,57 76,89 50,70 24,89 33,57 7,38 39,37" fill="${fill}"></polygon></svg></span>`;
+        }
+        return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><rect x="14" y="14" width="72" height="72" rx="5" fill="${fill}"></rect></svg></span>`;
+      }
+
+      function renderStimulusItem(item) {
+        return renderShape(item.shape, item.hex);
+      }
+
+      function formatSeconds(ms) {
+        return `${Math.round(ms / 1000)}초`;
+      }
+
+      function updateProgress() {
+        const fill = $('progress-fill');
+        if (fill) {
+          fill.style.width = `${(state.currentIndex / state.trials.length) * 100}%`;
+        }
+      }
+
+      function renderOptions() {
+        const colorRoot = $('color-options');
+        const shapeRoot = $('shape-options');
+        if (colorRoot) {
+          colorRoot.innerHTML = core.COLORS.map((color) => `
+            <button class="option color-option" type="button" data-color="${color.id}">
+              <span class="shape small" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="${color.hex}"></circle></svg></span>
+              ${color.label}
+            </button>
+          `).join('');
+        }
+        if (shapeRoot) {
+          shapeRoot.innerHTML = core.SHAPES.map((shape) => `
+            <button class="option shape-option" type="button" data-shape="${shape.id}">
+              ${renderShape(shape.id, '#475467', 'small')}
+              ${shape.label}
+            </button>
+          `).join('');
+        }
+      }
+
+      function updateOptionState() {
+        document.querySelectorAll('.color-option').forEach((button) => {
+          button.classList.toggle('is-selected', button.dataset.color === state.selectedColor);
+        });
+        document.querySelectorAll('.shape-option').forEach((button) => {
+          button.classList.toggle('is-selected', button.dataset.shape === state.selectedShape);
+        });
+        const addButton = $('add-response-button');
+        if (addButton) {
+          addButton.disabled = !(state.selectedColor && state.selectedShape);
+        }
+      }
+
+      function renderResponseSequence() {
+        const trial = state.trials[state.currentIndex];
+        const root = $('response-sequence');
+        const submitButton = $('submit-button');
+        if (!trial || !root || !submitButton) {
+          return;
+        }
+
+        root.innerHTML = Array.from({ length: trial.setSize }, (_, index) => {
+          const responseId = state.responseItems[index];
+          if (!responseId) {
+            return `<div class="response-slot">${index + 1}</div>`;
+          }
+          const [colorId, shapeId] = responseId.split('_');
+          const color = getColor(colorId);
+          const shape = getShape(shapeId);
+          return `
+            <div class="response-slot">
+              ${renderShape(shapeId, color ? color.hex : '#98a2b3', 'medium')}
+              <span>${color ? color.label : colorId} ${shape ? shape.label : shapeId}</span>
+            </div>
+          `;
+        }).join('');
+
+        submitButton.disabled = state.responseItems.length !== trial.setSize;
+      }
+
+      function resetResponseState() {
+        state.selectedColor = '';
+        state.selectedShape = '';
+        state.responseItems = [];
+        updateOptionState();
+        renderResponseSequence();
+      }
+
+      async function runCurrentTrial() {
+        const trial = state.trials[state.currentIndex];
+        const stimulusText = $('stimulus-text');
+        const stageHelp = $('stage-help');
+        const responsePanel = $('response-panel');
+        const feedbackPanel = $('feedback-panel');
+        const trialStatus = $('trial-status');
+        const conditionStatus = $('condition-status');
+
+        if (!trial || !stimulusText || !stageHelp || !responsePanel || !feedbackPanel || !trialStatus || !conditionStatus) {
+          return;
+        }
+
+        responsePanel.classList.add('hidden');
+        feedbackPanel.classList.add('hidden');
+        resetResponseState();
+
+        const practiceCount = state.trials.filter((item) => item.practice).length;
+        const mainCount = state.trials.filter((item) => !item.practice).length;
+        const practiceIndex = state.trials.slice(0, state.currentIndex + 1).filter((item) => item.practice).length;
+        const mainIndex = state.trials.slice(0, state.currentIndex + 1).filter((item) => !item.practice).length;
+
+        trialStatus.textContent = trial.practice
+          ? `Practice ${practiceIndex} / ${practiceCount}`
+          : `Main ${mainIndex} / ${mainCount}`;
+        conditionStatus.textContent = `${trial.condition} · Set size ${trial.setSize} · ${formatSeconds(trial.retentionMs)}`;
+        updateProgress();
+
+        stimulusText.textContent = '+';
+        stageHelp.textContent = '고정점';
+        await sleep(trial.fixationMs);
+
+        stageHelp.textContent = '화면에 나오는 색상-도형 조합을 순서대로 기억하세요.';
+        for (const item of trial.sequence) {
+          stimulusText.innerHTML = renderStimulusItem(item);
+          await sleep(trial.stimulusMs);
+          stimulusText.textContent = '';
+          await sleep(trial.gapMs);
+        }
+
+        stimulusText.textContent = '+';
+        stageHelp.textContent = `유지 구간 ${formatSeconds(trial.retentionMs)}`;
+        await sleep(trial.retentionMs);
+
+        stimulusText.textContent = '';
+        stageHelp.textContent = '응답을 선택하세요.';
+        responsePanel.classList.remove('hidden');
+        state.responseStartedAt = performance.now();
+      }
+
+      function addResponseItem() {
+        const trial = state.trials[state.currentIndex];
+        if (!trial || !state.selectedColor || !state.selectedShape || state.responseItems.length >= trial.setSize) {
+          return;
+        }
+        state.responseItems.push(`${state.selectedColor}_${state.selectedShape}`);
+        state.selectedColor = '';
+        state.selectedShape = '';
+        updateOptionState();
+        renderResponseSequence();
+      }
+
+      function undoResponseItem() {
+        state.responseItems.pop();
+        renderResponseSequence();
+      }
+
+      function clearResponseItems() {
+        state.responseItems = [];
+        renderResponseSequence();
+      }
+
+      function recordCurrentResponse() {
+        const trial = state.trials[state.currentIndex];
+        if (!trial) {
+          return null;
+        }
+
+        const row = core.createResultRow({
+          participantId: state.participantId,
+          trialNumber: state.currentIndex + 1,
+          practice: trial.practice,
+          trial,
+          responseItems: state.responseItems,
+          reactionTimeMs: performance.now() - state.responseStartedAt,
+        });
+
+        state.results.push(row);
+        return row;
+      }
+
+      function handleSubmit() {
+        const row = recordCurrentResponse();
+        const trial = state.trials[state.currentIndex];
+        if (!row || !trial) {
+          return;
+        }
+
+        $('response-panel').classList.add('hidden');
+
+        if (trial.practice) {
+          const feedback = $('feedback-text');
+          if (feedback) {
+            feedback.textContent = `정답 ${row.stimulus_sequence} · 응답 ${row.response_sequence || '(무응답)'} · 부분 정확도 ${Math.round(Number(row.partial_accuracy) * 100)}%`;
+          }
+          $('feedback-panel').classList.remove('hidden');
+          return;
+        }
+
+        advanceTrial();
+      }
+
+      function advanceTrial() {
+        state.currentIndex += 1;
+        if (state.currentIndex >= state.trials.length) {
+          showResults();
+        } else {
+          runCurrentTrial();
+        }
+      }
+
+      function formatPercent(value) {
+        return `${Math.round(value * 100)}%`;
+      }
+
+      function showResults() {
+        setScreen('screen-results');
+        const summary = core.summarizeResults(state.results);
+        const summaryRoot = $('summary');
+        const tableRoot = $('condition-table');
+
+        if (summaryRoot) {
+          summaryRoot.innerHTML = `
+            <div class="summary-box"><span>본 시행</span><strong>${summary.totalTrials}</strong></div>
+            <div class="summary-box"><span>전체 정답률</span><strong>${formatPercent(summary.exactAccuracy)}</strong></div>
+            <div class="summary-box"><span>부분 정확도</span><strong>${formatPercent(summary.partialAccuracy)}</strong></div>
+            <div class="summary-box"><span>조건 수</span><strong>4</strong></div>
+          `;
+        }
+
+        if (tableRoot) {
+          const rows = Object.values(summary.byCondition)
+            .sort((a, b) => a.condition.localeCompare(b.condition))
+            .map((entry) => `
+              <tr>
+                <td>${entry.condition}</td>
+                <td>${entry.setSize}</td>
+                <td>${formatSeconds(entry.retentionMs)}</td>
+                <td>${formatPercent(entry.exactAccuracy)}</td>
+                <td>${formatPercent(entry.partialAccuracy)}</td>
+                <td>${Math.round(entry.meanRt)}</td>
+              </tr>
+            `)
+            .join('');
+          tableRoot.innerHTML = `
+            <table>
+              <thead>
+                <tr><th>조건</th><th>Set size</th><th>유지 구간</th><th>전체 정답률</th><th>부분 정확도</th><th>평균 RT(ms)</th></tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+        }
+      }
+
+      function downloadCsv() {
+        const csv = core.toCsv(state.results);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `color_shape_memory_v2_${state.participantId || 'participant'}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function sendToSheets() {
+        const status = $('sheets-status');
+        if (!state.sheetsUrl || state.sheetsUrl.includes('여기에_새')) {
+          if (status) {
+            status.textContent = 'HTML의 SHEETS_URL에 Google Apps Script Web App URL을 입력하면 시트로 전송할 수 있습니다.';
+          }
+          return;
+        }
+
+        if (status) {
+          status.textContent = 'Google Sheets로 전송 중입니다.';
+        }
+
+        try {
+          await fetch(state.sheetsUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(core.buildSheetsPayload({
+              participantId: state.participantId,
+              rows: state.results,
+            })),
+          });
+          if (status) {
+            status.textContent = '전송 요청을 보냈습니다. Google Sheet에서 데이터가 들어왔는지 확인하세요.';
+          }
+        } catch (error) {
+          if (status) {
+            status.textContent = `전송 실패: ${error.message}`;
+          }
+        }
+      }
+
+      function startExperiment() {
+        const participantInput = $('participant-id');
+        const participantId = participantInput ? participantInput.value.trim() : '';
+        if (!participantId) {
+          participantInput.focus();
+          participantInput.setAttribute('aria-invalid', 'true');
+          return;
+        }
+        participantInput.setAttribute('aria-invalid', 'false');
+
+        state.participantId = participantId;
+        state.sheetsUrl = SHEETS_URL;
+        state.trials = [
+          ...core.buildPracticeTrials(),
+          ...core.buildMainTrials(),
+        ];
+        state.currentIndex = 0;
+        state.results = [];
+        setScreen('screen-task');
+        runCurrentTrial();
+      }
+
+      function restart() {
+        state.participantId = '';
+        state.sheetsUrl = '';
+        state.trials = [];
+        state.currentIndex = 0;
+        state.results = [];
+        resetResponseState();
+        setScreen('screen-start');
+        const fill = $('progress-fill');
+        if (fill) {
+          fill.style.width = '0%';
+        }
+      }
+
+      function init() {
+        if (!$('screen-start')) {
+          return;
+        }
+
+        renderOptions();
+        $('start-button').addEventListener('click', startExperiment);
+        $('add-response-button').addEventListener('click', addResponseItem);
+        $('undo-response-button').addEventListener('click', undoResponseItem);
+        $('clear-response-button').addEventListener('click', clearResponseItems);
+        $('submit-button').addEventListener('click', handleSubmit);
+        $('next-button').addEventListener('click', advanceTrial);
+        $('download-button').addEventListener('click', downloadCsv);
+        $('send-sheets-button').addEventListener('click', sendToSheets);
+        $('restart-button').addEventListener('click', restart);
+        document.addEventListener('click', (event) => {
+          const colorButton = event.target.closest('.color-option');
+          const shapeButton = event.target.closest('.shape-option');
+          if (colorButton) {
+            state.selectedColor = colorButton.dataset.color;
+            updateOptionState();
+          }
+          if (shapeButton) {
+            state.selectedShape = shapeButton.dataset.shape;
+            updateOptionState();
+          }
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    }());
+  </script>
+</body>
+
+</html>
