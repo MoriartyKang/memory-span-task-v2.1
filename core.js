@@ -26,9 +26,19 @@
   ];
   const SHAPES = [
     { id: 'circle', label: '원' },
-    { id: 'triangle', label: '세모' },
     { id: 'star', label: '별' },
+    { id: 'triangle', label: '삼각형' },
     { id: 'square', label: '사각형' },
+    { id: 'heart', label: '하트' },
+    { id: 'diamond', label: '다이아몬드' },
+  ];
+  const FIXED_STIMULI = [
+    { id: 'red_circle', color: 'red', shape: 'circle' },
+    { id: 'blue_star', color: 'blue', shape: 'star' },
+    { id: 'green_triangle', color: 'green', shape: 'triangle' },
+    { id: 'yellow_square', color: 'yellow', shape: 'square' },
+    { id: 'purple_heart', color: 'purple', shape: 'heart' },
+    { id: 'orange_diamond', color: 'orange', shape: 'diamond' },
   ];
   const CSV_COLUMNS = [
     'participant_id',
@@ -61,27 +71,23 @@
   }
 
   function buildStimulusPool() {
-    const pool = [];
-    COLORS.forEach((color) => {
-      SHAPES.forEach((shape) => {
-        pool.push({
-          id: `${color.id}_${shape.id}`,
-          color: color.id,
-          colorLabel: color.label,
-          hex: color.hex,
-          shape: shape.id,
-          shapeLabel: shape.label,
-          label: `${color.label} ${shape.label}`,
-        });
-      });
+    return FIXED_STIMULI.map((stimulus) => {
+      const color = COLORS.find((entry) => entry.id === stimulus.color);
+      const shape = SHAPES.find((entry) => entry.id === stimulus.shape);
+      return {
+        ...stimulus,
+        colorLabel: color.label,
+        hex: color.hex,
+        shapeLabel: shape.label,
+        label: `${color.label} ${shape.label}`,
+      };
     });
-    return pool;
   }
 
   function generateStimulusSequence(length, random = Math.random) {
     const pool = buildStimulusPool();
     if (length > pool.length) {
-      throw new RangeError('set size cannot exceed available color-shape combinations');
+      throw new RangeError('set size cannot exceed the six fixed stimuli');
     }
     return shuffleItems(pool, random).slice(0, length);
   }
@@ -244,6 +250,7 @@
     PRACTICE_REPETITIONS,
     COLORS,
     SHAPES,
+    FIXED_STIMULI,
     CSV_COLUMNS,
     shuffleItems,
     buildStimulusPool,

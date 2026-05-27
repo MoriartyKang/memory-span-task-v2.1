@@ -144,28 +144,27 @@
       border: 1px solid var(--line);
     }
 
-    button.warning {
-      background: var(--coral);
-    }
-
-    button.option {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: #fff;
-      color: var(--text);
-      border: 1px solid var(--line);
-    }
-
-    button.option.is-selected {
-      border-color: var(--teal);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
-    }
-
     button:disabled {
       cursor: not-allowed;
       opacity: 0.58;
+    }
+
+    button.option {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      align-items: center;
+      justify-items: start;
+      gap: 10px;
+      min-height: 64px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      text-align: left;
+    }
+
+    button.option:hover:not(:disabled) {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
     }
 
     .status-list {
@@ -221,8 +220,8 @@
     }
 
     .shape.small {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       filter: none;
     }
 
@@ -248,17 +247,11 @@
       transition: width 180ms ease;
     }
 
-    .response-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 16px;
-      margin-top: 16px;
-    }
-
     .option-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
+      margin-top: 16px;
     }
 
     .response-sequence {
@@ -270,14 +263,16 @@
     }
 
     .response-slot {
-      min-height: 70px;
+      min-height: 76px;
       border: 1px dashed var(--line);
       border-radius: 8px;
       display: grid;
+      gap: 4px;
       place-items: center;
       background: #fbfcfe;
       color: var(--muted);
       font-size: 13px;
+      text-align: center;
     }
 
     .summary-grid {
@@ -329,7 +324,6 @@
     @media (max-width: 780px) {
 
       .grid,
-      .response-grid,
       .summary-grid {
         grid-template-columns: 1fr;
       }
@@ -359,7 +353,7 @@
     <header>
       <div>
         <h1>Color Shape Memory Task v2</h1>
-        <p class="subtle">색상과 도형 조합을 순서대로 기억하고, 선택지로 응답합니다.</p>
+        <p class="subtle">고정된 6개 색상-도형 항목을 순서대로 기억하고 선택지로 응답합니다.</p>
       </div>
       <span class="pill">2 × 2: set size 4/6 × delay 1s/4s</span>
     </header>
@@ -367,7 +361,7 @@
     <section id="screen-start" class="grid">
       <div class="panel">
         <h2>실험 시작</h2>
-        <p class="subtle">한 시행 안에서 같은 색상-도형 조합은 반복되지 않습니다. 도형이나 색상만 따로 보면 반복될 수 있습니다.</p>
+        <p class="subtle">자극은 빨간 원, 파란 별, 초록 삼각형, 노란 사각형, 보라 하트, 주황 다이아몬드로 고정됩니다.</p>
 
         <div class="field">
           <label for="participant-id">참가자 ID</label>
@@ -384,10 +378,10 @@
         <div class="status-list">
           <div class="stat"><span>연습 시행</span><strong>4</strong></div>
           <div class="stat"><span>본 시행</span><strong>24</strong></div>
-          <div class="stat"><span>조건</span><strong>A, B, C, D</strong></div>
+          <div class="stat"><span>고정 항목</span><strong>6개</strong></div>
           <div class="stat"><span>Set size</span><strong>4, 6</strong></div>
           <div class="stat"><span>유지 구간</span><strong>1초, 4초</strong></div>
-          <div class="stat"><span>응답 방식</span><strong>선택지 클릭</strong></div>
+          <div class="stat"><span>응답 방식</span><strong>항목 선택</strong></div>
         </div>
       </aside>
     </section>
@@ -404,27 +398,16 @@
       <div id="stimulus-stage" class="stage">
         <div class="cue">
           <div id="stimulus-text" class="stimulus">준비</div>
-          <p id="stage-help" class="subtle">화면에 나오는 색상-도형 조합을 순서대로 기억하세요.</p>
+          <p id="stage-help" class="subtle">화면에 나오는 항목을 순서대로 기억하세요.</p>
         </div>
       </div>
 
       <div id="response-panel" class="hidden">
         <h2>응답 선택</h2>
-        <p id="response-help" class="subtle">색상과 도형을 하나씩 선택한 뒤 추가하세요.</p>
-
-        <div class="response-grid">
-          <div>
-            <h2>색상</h2>
-            <div id="color-options" class="option-grid"></div>
-          </div>
-          <div>
-            <h2>도형</h2>
-            <div id="shape-options" class="option-grid"></div>
-          </div>
-        </div>
+        <p id="response-help" class="subtle">방금 본 항목을 순서대로 선택하세요.</p>
+        <div id="item-options" class="option-grid"></div>
 
         <div class="actions">
-          <button id="add-response-button" type="button" disabled>응답 추가</button>
           <button id="undo-response-button" class="secondary" type="button">되돌리기</button>
           <button id="clear-response-button" class="secondary" type="button">전체 지우기</button>
         </div>
@@ -461,7 +444,7 @@
   <script src="core.js"></script>
   <script>
     (function () {
-      const SHEETS_URL = '여기에_새_Google_Apps_Script_Web_App_URL을_넣으세요';
+      const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxBNr0P_tk1BRNihKKes_zRGchCC28JdiC6jtZB9eXkDiAYohSq6QfTPSVNvqxkkCgqjw/exec';
       const core = window.ColorShapeMemoryCore;
 
       const state = {
@@ -471,8 +454,6 @@
         currentIndex: 0,
         results: [],
         responseStartedAt: 0,
-        selectedColor: '',
-        selectedShape: '',
         responseItems: [],
       };
 
@@ -488,12 +469,8 @@
         });
       }
 
-      function getColor(colorId) {
-        return core.COLORS.find((color) => color.id === colorId);
-      }
-
-      function getShape(shapeId) {
-        return core.SHAPES.find((shape) => shape.id === shapeId);
+      function getStimulusById(itemId) {
+        return core.buildStimulusPool().find((item) => item.id === itemId);
       }
 
       function renderShape(shapeId, colorHex, sizeClass = '') {
@@ -508,11 +485,17 @@
         if (shapeId === 'star') {
           return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon points="50,7 61,37 93,38 67,57 76,89 50,70 24,89 33,57 7,38 39,37" fill="${fill}"></polygon></svg></span>`;
         }
+        if (shapeId === 'heart') {
+          return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><path d="M50 88 C22 62 10 48 10 30 C10 17 20 8 33 8 C41 8 47 12 50 19 C53 12 59 8 67 8 C80 8 90 17 90 30 C90 48 78 62 50 88 Z" fill="${fill}"></path></svg></span>`;
+        }
+        if (shapeId === 'diamond') {
+          return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><polygon points="50,6 94,50 50,94 6,50" fill="${fill}"></polygon></svg></span>`;
+        }
         return `<span class="${className}" aria-hidden="true"><svg viewBox="0 0 100 100"><rect x="14" y="14" width="72" height="72" rx="5" fill="${fill}"></rect></svg></span>`;
       }
 
-      function renderStimulusItem(item) {
-        return renderShape(item.shape, item.hex);
+      function renderStimulusItem(item, sizeClass = '') {
+        return renderShape(item.shape, item.hex, sizeClass);
       }
 
       function formatSeconds(ms) {
@@ -527,37 +510,24 @@
       }
 
       function renderOptions() {
-        const colorRoot = $('color-options');
-        const shapeRoot = $('shape-options');
-        if (colorRoot) {
-          colorRoot.innerHTML = core.COLORS.map((color) => `
-            <button class="option color-option" type="button" data-color="${color.id}">
-              <span class="shape small" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="${color.hex}"></circle></svg></span>
-              ${color.label}
-            </button>
-          `).join('');
+        const root = $('item-options');
+        if (!root) {
+          return;
         }
-        if (shapeRoot) {
-          shapeRoot.innerHTML = core.SHAPES.map((shape) => `
-            <button class="option shape-option" type="button" data-shape="${shape.id}">
-              ${renderShape(shape.id, '#475467', 'small')}
-              ${shape.label}
-            </button>
-          `).join('');
-        }
+        root.innerHTML = core.buildStimulusPool().map((item) => `
+          <button class="option item-option" type="button" data-item="${item.id}">
+            ${renderStimulusItem(item, 'small')}
+            <span>${item.label}</span>
+          </button>
+        `).join('');
       }
 
       function updateOptionState() {
-        document.querySelectorAll('.color-option').forEach((button) => {
-          button.classList.toggle('is-selected', button.dataset.color === state.selectedColor);
+        const trial = state.trials[state.currentIndex];
+        const isFull = trial ? state.responseItems.length >= trial.setSize : false;
+        document.querySelectorAll('.item-option').forEach((button) => {
+          button.disabled = isFull;
         });
-        document.querySelectorAll('.shape-option').forEach((button) => {
-          button.classList.toggle('is-selected', button.dataset.shape === state.selectedShape);
-        });
-        const addButton = $('add-response-button');
-        if (addButton) {
-          addButton.disabled = !(state.selectedColor && state.selectedShape);
-        }
       }
 
       function renderResponseSequence() {
@@ -573,25 +543,21 @@
           if (!responseId) {
             return `<div class="response-slot">${index + 1}</div>`;
           }
-          const [colorId, shapeId] = responseId.split('_');
-          const color = getColor(colorId);
-          const shape = getShape(shapeId);
+          const item = getStimulusById(responseId);
           return `
             <div class="response-slot">
-              ${renderShape(shapeId, color ? color.hex : '#98a2b3', 'medium')}
-              <span>${color ? color.label : colorId} ${shape ? shape.label : shapeId}</span>
+              ${item ? renderStimulusItem(item, 'medium') : ''}
+              <span>${item ? item.label : responseId}</span>
             </div>
           `;
         }).join('');
 
         submitButton.disabled = state.responseItems.length !== trial.setSize;
+        updateOptionState();
       }
 
       function resetResponseState() {
-        state.selectedColor = '';
-        state.selectedShape = '';
         state.responseItems = [];
-        updateOptionState();
         renderResponseSequence();
       }
 
@@ -627,7 +593,7 @@
         stageHelp.textContent = '고정점';
         await sleep(trial.fixationMs);
 
-        stageHelp.textContent = '화면에 나오는 색상-도형 조합을 순서대로 기억하세요.';
+        stageHelp.textContent = '화면에 나오는 항목을 순서대로 기억하세요.';
         for (const item of trial.sequence) {
           stimulusText.innerHTML = renderStimulusItem(item);
           await sleep(trial.stimulusMs);
@@ -645,15 +611,12 @@
         state.responseStartedAt = performance.now();
       }
 
-      function addResponseItem() {
+      function addResponseItem(itemId) {
         const trial = state.trials[state.currentIndex];
-        if (!trial || !state.selectedColor || !state.selectedShape || state.responseItems.length >= trial.setSize) {
+        if (!trial || !itemId || state.responseItems.length >= trial.setSize) {
           return;
         }
-        state.responseItems.push(`${state.selectedColor}_${state.selectedShape}`);
-        state.selectedColor = '';
-        state.selectedShape = '';
-        updateOptionState();
+        state.responseItems.push(itemId);
         renderResponseSequence();
       }
 
@@ -731,7 +694,7 @@
             <div class="summary-box"><span>본 시행</span><strong>${summary.totalTrials}</strong></div>
             <div class="summary-box"><span>전체 정답률</span><strong>${formatPercent(summary.exactAccuracy)}</strong></div>
             <div class="summary-box"><span>부분 정확도</span><strong>${formatPercent(summary.partialAccuracy)}</strong></div>
-            <div class="summary-box"><span>조건 수</span><strong>4</strong></div>
+            <div class="summary-box"><span>고정 항목</span><strong>6</strong></div>
           `;
         }
 
@@ -775,7 +738,7 @@
 
       async function sendToSheets() {
         const status = $('sheets-status');
-        if (!state.sheetsUrl || state.sheetsUrl.includes('여기에_새')) {
+        if (!state.sheetsUrl || state.sheetsUrl.includes('')) {
           if (status) {
             status.textContent = 'HTML의 SHEETS_URL에 Google Apps Script Web App URL을 입력하면 시트로 전송할 수 있습니다.';
           }
@@ -849,7 +812,6 @@
 
         renderOptions();
         $('start-button').addEventListener('click', startExperiment);
-        $('add-response-button').addEventListener('click', addResponseItem);
         $('undo-response-button').addEventListener('click', undoResponseItem);
         $('clear-response-button').addEventListener('click', clearResponseItems);
         $('submit-button').addEventListener('click', handleSubmit);
@@ -858,15 +820,9 @@
         $('send-sheets-button').addEventListener('click', sendToSheets);
         $('restart-button').addEventListener('click', restart);
         document.addEventListener('click', (event) => {
-          const colorButton = event.target.closest('.color-option');
-          const shapeButton = event.target.closest('.shape-option');
-          if (colorButton) {
-            state.selectedColor = colorButton.dataset.color;
-            updateOptionState();
-          }
-          if (shapeButton) {
-            state.selectedShape = shapeButton.dataset.shape;
-            updateOptionState();
+          const itemButton = event.target.closest('.item-option');
+          if (itemButton) {
+            addResponseItem(itemButton.dataset.item);
           }
         });
       }
